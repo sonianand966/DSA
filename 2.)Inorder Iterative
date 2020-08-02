@@ -1,0 +1,107 @@
+Three types of Iterative Inorder Traversals.
+
+Using 1 Stack. O(n) Time & O(n) Space
+Push all left nodes into the stack till it hits NULL.
+Then Pop the top element from the stack, print it and make the root point to its right.
+Keep iterating till both the below conditions are met -
+Stack is empty and
+Root is NULL.
+ 
+public List<Integer> inorderTraversal(TreeNode root) {
+		List<Integer> out = new ArrayList<Integer>();
+		if(root==null)
+			return out;
+		Stack<TreeNode> s = new Stack();      
+		while(root!=null || !s.empty()){
+			if(root!=null){				
+				s.push(root);
+				root = root.left;
+			}
+			else{
+				root = s.pop();
+				out.add(root.val);
+				root = root.right;
+			}
+		}
+		return out;
+	}
+	
+Using 2 Stacks. O(n) Time & O(n) Space
+We use two stacks. Stack s is used to find and traverse the child nodes, and path stack keeps track of the path from the root to the current node. (This is usefull in certain problems like Binary Tree Paths and Path Sum ).
+The logic is similar to Preorder using 2 Stacks . The difference is on every iteration we first pop s. Then push it back in when we push the children. Make sure the order of pushing is right child -> root -> left child. Also, we print the element only on our way back.
+Initially we push the root into s.
+Keep iterating with below logic till s is empty.
+root = s.pop()
+If the top elements of both the stacks are not the same :
+Push root into path.
+Push right child into s if it exists.
+Push root back into s.
+Now, push left child into s if it exists.
+When top elements of both stacks are equal. (Which means we hit a deadend, and need to turn back)
+Pop from path.
+Print the root.
+
+	public List<Integer> inorderTraversal(TreeNode root) {
+		List<Integer> out = new ArrayList<Integer>();
+        if(root == null)
+            return out; 
+        Stack<TreeNode> s = new Stack(), path = new Stack();
+        s.push(root);
+        while(!s.empty()){
+            root = s.pop();
+            if(!path.empty() && path.peek()==root){                
+                path.pop();
+		    out.add(root.val);
+            }
+            else{                
+                path.push(root);
+                if(root.right != null)
+                    s.push(root.right);
+		    s.push(root);
+                if(root.left != null)
+                    s.push(root.left);
+            }
+        }
+	    return out;
+    }
+	
+Using No Stacks (Morris Traversal). O(n) Time & O(1) Space
+Instead of using stacks to remember our way back up the tree, we are going to modify the tree to create upwards links. The idea is based on Threaded Binary Tree.
+Iterate till root is null.
+If root has a left child.
+Find the inorder predecessor. (Inorder predecessor of root is the right most child of its left child)
+Make it point to root.
+root = root.left.
+If its already pointing to root (which means we have traversed it already and are on our way up.)
+Make the inorder predecessor point to null (Reverting our structural changes)
+root = root.right.
+If left child is null
+root = root.right. (We are climbing up our link.)
+
+	public List<Integer> inorderTraversal(TreeNode root) {
+		List<Integer> out = new ArrayList<Integer>();
+			if(root == null)
+				return out;
+			TreeNode pre = null;
+			while(root!=null){
+				if(root.left !=null){
+					pre = root.left;
+					while(pre.right!=null && pre.right!=root)
+						pre=pre.right;
+					if(pre.right==null){						
+						pre.right=root;
+						root=root.left;
+					}
+					else{
+					    out.add(root.val);
+						pre.right=null;
+						root=root.right;
+					}                   
+				}
+				else{
+					out.add(root.val);
+					root=root.right;
+				}
+			}
+			return out;
+		}
